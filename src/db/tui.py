@@ -11,7 +11,7 @@ def _print_menu(current_table: str) -> None:
     print("6. Найти записи по фильтру")
     print("7. Обновить запись")
     print("8. Удалить запись")
-    print("0. Выход")
+    print("0. Выход из программы")
 
 
 def _read_int(prompt: str) -> int:
@@ -80,7 +80,7 @@ def _show_tables(database: MemoryDatabase) -> None:
 def _add_book(database: MemoryDatabase, table_name: str) -> None:
     print(f"\nДобавление записи в таблицу '{table_name}'")
 
-    book_id  = _read_int("id: ")
+    book_id = _read_int("id: ")
     title = input("title: ").strip()
     author = input("author: ").strip()
     year = _read_int("year: ")
