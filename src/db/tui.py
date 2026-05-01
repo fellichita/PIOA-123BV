@@ -1,12 +1,4 @@
-from .backend.memory import (
-    DEFAULT_TABLE_NAME,
-    create_record,
-    create_table,
-    delete_record,
-    list_tables,
-    select_record,
-    update_record,
-)
+from .backend.memory import DEFAULT_TABLE_NAME, MemoryDatabase
 
 
 def _print_menu(current_table: str) -> None:
@@ -47,32 +39,31 @@ def _print_records(records: list[tuple[int, str, str, int, str]]) -> None:
         print("Записи не найдены.")
         return
 
+    for row in records:
+        print(row)
 
-    for record in records:
-        print(record)
 
-
-def _create_table() -> str | None:
+def _create_table(database: MemoryDatabase) -> str | None:
     print("\nСоздание таблицы")
     table_name = input("Имя таблицы: ").strip()
 
     try:
-        created_table = create_table(table_name)
-        print(f"Таблица '{created_table}' создана.")
-        return created_table
+        made_table = database.create_table(table_name)
+        print(f"Таблица '{made_table}' создана.")
+        return made_table
     except ValueError as error:
         print(f"Ошибка: {error}")
         return None
 
 
-def _select_table() -> str | None:
+def _select_table(database: MemoryDatabase) -> str | None:
     print("\nДоступные таблицы:")
-    for table_name in list_tables():
+    for table_name in database.list_tables():
         print(table_name)
 
     selected_table = input("Введите имя таблицы: ").strip()
     try:
-        select_record(selected_table)
+        database.get_table(selected_table)
         print(f"Текущая таблица изменена на '{selected_table}'.")
         return selected_table
     except ValueError as error:
@@ -80,38 +71,37 @@ def _select_table() -> str | None:
         return None
 
 
-def _show_tables() -> None:
+def _show_tables(database: MemoryDatabase) -> None:
     print("\nСписок таблиц")
-
-    for table_name in list_tables():
+    for table_name in database.list_tables():
         print(table_name)
 
 
-def _add_book(table_name: str) -> None:
+def _add_book(database: MemoryDatabase, table_name: str) -> None:
     print(f"\nДобавление записи в таблицу '{table_name}'")
 
-    book_id = _read_int("id: ")
+    book_id  = _read_int("id: ")
     title = input("title: ").strip()
     author = input("author: ").strip()
     year = _read_int("year: ")
     genre = input("genre: ").strip()
 
     try:
-        record = create_record(table_name, book_id, title, author, year, genre)
+        record = database.get_table(table_name).create_record(book_id, title, author, year, genre)
         print(f"Запись добавлена: {record}")
     except ValueError as error:
         print(f"Ошибка: {error}")
 
 
-def _show_all_books(table_name: str) -> None:
+def _show_all_books(database: MemoryDatabase, table_name: str) -> None:
     print(f"\nСписок записей таблицы '{table_name}'")
     try:
-        _print_records(select_record(table_name))
+        _print_records(database.get_table(table_name).select_record())
     except ValueError as error:
         print(f"Ошибка: {error}")
 
 
-def _find_books_by_filter(table_name: str) -> None:
+def _find_books_by_filter(database: MemoryDatabase, table_name: str) -> None:
     print(f"\nПоиск в таблице '{table_name}' (Enter = пропустить поле)")
 
     book_id = _read_optional_int("id: ")
@@ -121,20 +111,19 @@ def _find_books_by_filter(table_name: str) -> None:
     genre = input("genre: ").strip() or None
 
     try:
-        records = select_record(
-            table_name,
+        result = database.get_table(table_name).select_record(
             book_id=book_id,
             title=title,
             author=author,
             year=year,
             genre=genre,
         )
-        _print_records(records)
+        _print_records(result)
     except ValueError as error:
         print(f"Ошибка: {error}")
 
 
-def _update_book(table_name: str) -> None:
+def _update_book(database: MemoryDatabase, table_name: str) -> None:
     print(f"\nОбновление записи в таблице '{table_name}'")
     print("Оставьте поле пустым, если не хотите его менять.")
 
@@ -145,8 +134,7 @@ def _update_book(table_name: str) -> None:
     genre = input("genre: ").strip()
 
     try:
-        record = update_record(
-            table_name,
+        record = database.get_table(table_name).update_record(
             book_id,
             title=title if title != "" else None,
             author=author if author != "" else None,
@@ -158,45 +146,46 @@ def _update_book(table_name: str) -> None:
         print(f"Ошибка: {error}")
 
 
-def _delete_book(table_name: str) -> None:
+def _delete_book(database: MemoryDatabase, table_name: str) -> None:
     print(f"\nУдаление записи из таблицы '{table_name}'")
-    book_id  = _read_int("id записи: ")
+    book_id = _read_int("id записи: ")
 
     try:
-        record = delete_record(table_name, book_id)
+        record = database.get_table(table_name).delete_record(book_id)
         print(f"Запись удалена: {record}")
     except ValueError as error:
         print(f"Ошибка: {error}")
 
 
 def run() -> None:
+    database = MemoryDatabase()
     current_table = DEFAULT_TABLE_NAME
 
     while True:
         _print_menu(current_table)
-        action = input("Выберите действие: ").strip()
+        menu_choice = input("Выберите действие: ").strip()
 
-        if action == "1":
-            created_table = _create_table()
-            if created_table is not None:
-                current_table = created_table
-        elif action == "2":
-            selected_table = _select_table()
+        if menu_choice == "1":
+            made_table = _create_table(database)
+            if made_table is not None:
+                current_table = made_table
+        elif menu_choice == "2":
+            selected_table = _select_table(database)
             if selected_table is not None:
                 current_table = selected_table
-        elif action == "3":
-            _show_tables()
-        elif action == "4":
-            _add_book(current_table)
-        elif action == "5":
-            _show_all_books(current_table)
-        elif action == "6":
-            _find_books_by_filter(current_table)
-        elif action == "7":
-            _update_book(current_table)
-        elif action == "8":
-            _delete_book(current_table)
-        elif action == "0":
+        elif menu_choice == "3":
+            _show_tables(database)
+        elif menu_choice == "4":
+            _add_book(database, current_table)
+        elif menu_choice == "5":
+            _show_all_books(database, current_table)
+        elif menu_choice == "6":
+            _find_books_by_filter(database, current_table)
+        elif menu_choice == "7":
+            _update_book(database, current_table)
+        elif menu_choice == "8":
+            _delete_book(database, current_table)
+        elif menu_choice == "0":
             print("Выход из программы.")
             break
         else:
