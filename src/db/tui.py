@@ -47,7 +47,6 @@ def _print_records(records: list[tuple[int, str, str, int, str]]) -> None:
         print("Записи не найдены.")
         return
 
-
     for record in records:
         print(record)
 
@@ -121,7 +120,7 @@ def _find_books_by_filter(table_name: str) -> None:
     genre = input("genre: ").strip() or None
 
     try:
-        records = select_record(
+        result = select_record(
             table_name,
             book_id=book_id,
             title=title,
@@ -129,7 +128,7 @@ def _find_books_by_filter(table_name: str) -> None:
             year=year,
             genre=genre,
         )
-        _print_records(records)
+        _print_records(result)
     except ValueError as error:
         print(f"Ошибка: {error}")
 
@@ -174,29 +173,29 @@ def run() -> None:
 
     while True:
         _print_menu(current_table)
-        action = input("Выберите действие: ").strip()
+        cmd = input("Выберите действие: ").strip()
 
-        if action == "1":
+        if cmd == "1":
             created_table = _create_table()
             if created_table is not None:
                 current_table = created_table
-        elif action == "2":
+        elif cmd == "2":
             selected_table = _select_table()
             if selected_table is not None:
                 current_table = selected_table
-        elif action == "3":
+        elif cmd == "3":
             _show_tables()
-        elif action == "4":
+        elif cmd == "4":
             _add_book(current_table)
-        elif action == "5":
+        elif cmd == "5":
             _show_all_books(current_table)
-        elif action == "6":
+        elif cmd == "6":
             _find_books_by_filter(current_table)
-        elif action == "7":
+        elif cmd == "7":
             _update_book(current_table)
-        elif action == "8":
+        elif cmd == "8":
             _delete_book(current_table)
-        elif action == "0":
+        elif cmd == "0":
             print("Выход из программы.")
             break
         else:

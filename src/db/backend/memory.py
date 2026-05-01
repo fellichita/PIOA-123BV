@@ -5,10 +5,10 @@ _TABLES: dict[str, list[BookRecord]] = {DEFAULT_TABLE_NAME: []}
 
 
 def _validate_table_name(table_name: str) -> str:
-    normalized_name = table_name.strip()
-    if normalized_name == "":
+    table_name = table_name.strip()
+    if table_name == "":
         raise ValueError("Имя таблицы не может быть пустым.")
-    return normalized_name
+    return table_name
 
 
 def _get_table(table_name: str) -> list[BookRecord]:
@@ -105,7 +105,7 @@ def select_record(
     ):
         return table.copy()
 
-    result: list[BookRecord] = []
+    found = []
 
     for record in table:
         if book_id is not None and record[0] != book_id:
@@ -118,9 +118,9 @@ def select_record(
             continue
         if genre is not None and record[4] != genre:
             continue
-        result.append(record)
+        found.append(record)
 
-    return result
+    return found
 
 
 def update_record(
