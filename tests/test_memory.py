@@ -28,10 +28,11 @@ from src.db.tui import (
 class TestMemoryDatabase(unittest.TestCase):
     def setUp(self) -> None:
         self.database = MemoryDatabase()
+        self.database.create_table("Books")
         self.table = self.database.get_table("Books")
 
-    def test_default_table_exists(self) -> None:
-        self.assertEqual(self.database.list_tables(), ["Books"])
+    def test_default_table_is_empty(self) -> None:
+        self.assertEqual(self.database.list_tables(), [])
 
     def test_create_table(self) -> None:
         table_name = self.database.create_table(" Library ")
@@ -131,6 +132,7 @@ class TestMemoryDatabase(unittest.TestCase):
 class TestTuiHelpers(unittest.TestCase):
     def setUp(self) -> None:
         self.database = MemoryDatabase()
+        self.database.create_table("Books")
 
     @patch("builtins.input", side_effect=["abc", "5"])
     @patch("builtins.print")

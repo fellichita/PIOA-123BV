@@ -2,7 +2,7 @@ from .errors import DuplicateIDError, InvalidFieldError, RecordNotFoundError, Ta
 
 BookRecord = tuple[int, str, str, int, str]
 
-DEFAULT_TABLE_NAME = "Books"
+DEFAULT_TABLE_NAME = ""
 
 
 def _normalize_table_name(table_name: str) -> str:
@@ -46,7 +46,12 @@ class BookTable:
         if any(row[0] == book_id for row in self._records):
             raise DuplicateIDError(f"Запись с id={book_id} уже существует.")
 
-        clean_title, clean_author, clean_year, clean_genre = _normalize_book_data(title, author, year, genre)
+        clean_title, clean_author, clean_year, clean_genre = _normalize_book_data(
+            title,
+            author,
+            year,
+            genre,
+        )
         fresh_record: BookRecord = (book_id, clean_title, clean_author, clean_year, clean_genre)
         self._records.append(fresh_record)
         return fresh_record
@@ -107,7 +112,13 @@ class BookTable:
                 next_year,
                 next_genre,
             )
-            updated_row: BookRecord = (book_id, clean_title, clean_author, clean_year, clean_genre)
+            updated_row: BookRecord = (
+                book_id,
+                clean_title,
+                clean_author,
+                clean_year,
+                clean_genre,
+            )
             self._records[pos] = updated_row
             return updated_row
 
@@ -123,7 +134,7 @@ class BookTable:
 
 class MemoryDatabase:
     def __init__(self) -> None:
-        self._tables: dict[str, BookTable] = {DEFAULT_TABLE_NAME: BookTable(DEFAULT_TABLE_NAME)}
+        self._tables: dict[str, BookTable] = {}
 
     def create_table(self, table_name: str) -> str:
         clean_name = _normalize_table_name(table_name)
