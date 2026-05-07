@@ -10,7 +10,8 @@ from .backend.memory import (
 
 
 def _print_menu(current_table: str) -> None:
-    print(f"\n=== База книг | Текущая таблица: {current_table} ===")
+    current_table_label = current_table if current_table else "не выбрана"
+    print(f"\n=== База книг | Текущая таблица: {current_table_label} ===")
     print("1. Создать таблицу")
     print("2. Выбрать таблицу")
     print("3. Показать все таблицы")
@@ -65,8 +66,13 @@ def _create_table() -> str | None:
 
 
 def _select_table() -> str | None:
+    tables = list_tables()
+    if not tables:
+        print("\nТаблиц пока нет.")
+        return None
+
     print("\nДоступные таблицы:")
-    for table_name in list_tables():
+    for table_name in tables:
         print(table_name)
 
     selected_table = input("Введите имя таблицы: ").strip()
@@ -82,11 +88,27 @@ def _select_table() -> str | None:
 def _show_tables() -> None:
     print("\nСписок таблиц")
 
-    for table_name in list_tables():
+    tables = list_tables()
+    if not tables:
+        print("Таблиц пока нет.")
+        return
+
+    for table_name in tables:
         print(table_name)
 
 
+def _ensure_table_selected(table_name: str) -> bool:
+    if table_name:
+        return True
+
+    print("Ошибка: сначала создайте или выберите таблицу.")
+    return False
+
+
 def _add_book(table_name: str) -> None:
+    if not _ensure_table_selected(table_name):
+        return
+
     print(f"\nДобавление записи в таблицу '{table_name}'")
 
     book_id = _read_int("id: ")
@@ -103,6 +125,9 @@ def _add_book(table_name: str) -> None:
 
 
 def _show_all_books(table_name: str) -> None:
+    if not _ensure_table_selected(table_name):
+        return
+
     print(f"\nСписок записей таблицы '{table_name}'")
     try:
         _print_records(select_record(table_name))
@@ -111,6 +136,9 @@ def _show_all_books(table_name: str) -> None:
 
 
 def _find_books_by_filter(table_name: str) -> None:
+    if not _ensure_table_selected(table_name):
+        return
+
     print(f"\nПоиск в таблице '{table_name}' (Enter = пропустить поле)")
 
     book_id = _read_optional_int("id: ")
@@ -134,6 +162,9 @@ def _find_books_by_filter(table_name: str) -> None:
 
 
 def _update_book(table_name: str) -> None:
+    if not _ensure_table_selected(table_name):
+        return
+
     print(f"\nОбновление записи в таблице '{table_name}'")
     print("Оставьте поле пустым, если не хотите его менять.")
 
@@ -158,8 +189,11 @@ def _update_book(table_name: str) -> None:
 
 
 def _delete_book(table_name: str) -> None:
+    if not _ensure_table_selected(table_name):
+        return
+
     print(f"\nУдаление записи из таблицы '{table_name}'")
-    book_id  = _read_int("id записи: ")
+    book_id = _read_int("id записи: ")
 
     try:
         record = delete_record(table_name, book_id)

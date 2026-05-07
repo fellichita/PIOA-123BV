@@ -1,7 +1,7 @@
 BookRecord = tuple[int, str, str, int, str]
 
-DEFAULT_TABLE_NAME  = "Books"
-_TABLES: dict[str, list[BookRecord]] = {DEFAULT_TABLE_NAME: []}
+DEFAULT_TABLE_NAME = ""
+_TABLES: dict[str, list[BookRecord]] = {}
 
 
 def _validate_table_name(table_name: str) -> str:
@@ -50,9 +50,6 @@ def create_table(table_name: str) -> str:
 
 def list_tables() -> list[str]:
     return list(_TABLES.keys())
-
-
-
 
 
 def create_record(
@@ -168,6 +165,5 @@ def delete_record(table_name: str, book_id: int) -> BookRecord:
     for index, record in enumerate(table):
         if record[0] == book_id:
             return table.pop(index)
-
 
     raise ValueError(f"Запись с id={book_id} не найдена в таблице '{table_name}'.")
